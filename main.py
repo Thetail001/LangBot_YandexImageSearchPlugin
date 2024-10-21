@@ -71,11 +71,11 @@ class ImageSearchPlugin(BasePlugin):
                     next_sibling = strong.next_sibling
                     if next_sibling and isinstance(next_sibling, NavigableString):
                         value = next_sibling.strip()
-                        result.append(f"{key} {value}")
+                        result.append(f"{key} {value}\n")
                     else:
-                        result.append(f"图片标题：{strong.text.strip()}")
+                        result.append(f"图片标题：{strong.text.strip()}\n")
                 else:
-                    result.append(f"图片标题：{title_div.text.strip()}")
+                    result.append(f"图片标题：{title_div.text.strip()}\n")
 
             # 处理所有的 resultcontentcolumn
             content_columns = result_div.select('.resultcontentcolumn')
@@ -98,17 +98,17 @@ class ImageSearchPlugin(BasePlugin):
                             next_element = next_element.next_sibling
 
                         if link_href:
-                            result.append(f"{key} {value}(链接:{link_href})")
+                            result.append(f"{key} {value}\n链接:{link_href}\n")
                         else:
-                            result.append(f"{key} {value}")
+                            result.append(f"{key} {value}\n")
                 else:
                     value = column.text.strip()
                     link = column.find('a')
                     if link:
                         href = link.get('href', '')
-                        result.append(f"{value}(链接:{href})")
+                        result.append(f"{value}\n链接:{href}\n")
                     else:
-                        result.append(value)
+                        result.append(f"{value}\n")
 
             return "\n".join(result)
         else:
