@@ -16,11 +16,8 @@ class ImageSearchPlugin(BasePlugin):
         pass
 
     @handler(PersonNormalMessageReceived)
-    async def on_person_message(self, ctx: EventContext):
-        await self.process_message(ctx)
-
     @handler(GroupNormalMessageReceived)
-    async def on_group_message(self, ctx: EventContext):
+    async def on_message(self, ctx: EventContext):
         await self.process_message(ctx)
 
     async def process_message(self, ctx: EventContext):
@@ -67,11 +64,13 @@ class ImageSearchPlugin(BasePlugin):
             if title_div:
                 strong = title_div.find('strong')
                 if strong:
-                    key = strong.text.strip(':')
+                    key = strong.text.strip(': ')
                     next_sibling = strong.next_sibling
                     if next_sibling and isinstance(next_sibling, NavigableString):
+                        if key == 'Creator':
+                            key = '创作者'
                         value = next_sibling.strip()
-                        result.append(f"{key} {value}\n")
+                        result.append(f"{key}：{value}\n")
                     else:
                         result.append(f"图片标题：{strong.text.strip()}\n")
                 else:
@@ -83,7 +82,17 @@ class ImageSearchPlugin(BasePlugin):
                 strongs = column.find_all('strong')
                 if strongs:
                     for strong in strongs:
-                        key = strong.text.strip(':')
+                        key = strong.text.strip(': ')
+                        if key == 'Source':
+                            key = '来源'
+                        elif key == 'Material':
+                            key = '原作'
+                        elif key == 'Characters':
+                            key = '角色'
+                        elif key == 'Author':
+                            key = '作者'
+                        elif key == 'Member':
+                            key = '站点成员'
                         next_element = strong.next_sibling
                         value = ''
                         link_href = ''
@@ -98,15 +107,15 @@ class ImageSearchPlugin(BasePlugin):
                             next_element = next_element.next_sibling
 
                         if link_href:
-                            result.append(f"{key} {value}\n链接:{link_href}\n")
+                            result.append(f"{key}：{value}\n链接：{link_href}\n")
                         else:
-                            result.append(f"{key} {value}\n")
+                            result.append(f"{key}：{value}\n")
                 else:
                     value = column.text.strip()
                     link = column.find('a')
                     if link:
                         href = link.get('href', '')
-                        result.append(f"{value}\n链接:{href}\n")
+                        result.append(f"{value}\n链接：{href}\n")
                     else:
                         result.append(f"{value}\n")
 
