@@ -32,6 +32,8 @@ class ImageSearchPlugin(BasePlugin):
                     ctx.add_return('reply', [mirai.Plain(search_result)])
                     # 阻止该事件默认行为
                     ctx.prevent_default()
+                    # 阻止后续插件执行
+                    ctx.prevent_postorder()
                 break
 
     def search_image(self, image_url):
