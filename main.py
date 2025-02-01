@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 import requests
 from bs4 import BeautifulSoup, NavigableString
-from pkg.plugin.context import register, handler, BasePlugin, APIHost, EventContext, mirai
+from pkg.plugin.context import register, handler, BasePlugin, APIHost, EventContext
 from pkg.plugin.events import *
+import pkg.platform.types as platform_types
 
 @register(name="ImageSearchPlugin", description="使用识图网站搜索图片来源",
           version="1.0", author="BiFangKNT")
@@ -24,12 +25,12 @@ class ImageSearchPlugin(BasePlugin):
         # 检查消息中是否包含图片
         message_chain = ctx.event.query.message_chain
         for message in message_chain:
-            if isinstance(message, mirai.Image):
+            if isinstance(message, platform_types.Image):
                 image_url = message.url
                 search_result = self.search_image(image_url)
                 if search_result:
                     # 使用 add_return 方法添加回复
-                    ctx.add_return('reply', [mirai.Plain(search_result)])
+                    ctx.add_return('reply', [platform_types.Plain(search_result)])
                     # 阻止该事件默认行为
                     ctx.prevent_default()
                     # 阻止后续插件执行
