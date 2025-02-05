@@ -112,3 +112,6 @@ class ImageSearchPlugin(BasePlugin):
             message_parts.append(platform_types.Image(url=first_result.thumbnail))
 
         return message_parts  # 返回列表
+
+    def __del__(self):
+        pass
