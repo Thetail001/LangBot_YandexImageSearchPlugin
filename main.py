@@ -28,6 +28,7 @@ class ImageSearchPlugin(BasePlugin):
 
     async def process_message(self, ctx: EventContext):
         """处理收到的消息"""
+        self.ap.logger.info("开始处理消息。")
         message_chain = ctx.event.query.message_chain
         for message in message_chain:
             if isinstance(message, platform_types.Image):
@@ -41,14 +42,14 @@ class ImageSearchPlugin(BasePlugin):
                                 ctx.prevent_default()
                                 ctx.prevent_postorder()
                         else:
-                            self.ap.logger.warning("图片保存失败，无法进行搜索。")
+                            self.ap.logger.error("图片保存失败，无法进行搜索。")
                     finally:
                         # 确保临时文件被删除
                         if temp_image_path:
                             import os
                             os.remove(temp_image_path)
                 else:
-                    self.ap.logger.warning("No Base64 image data found.")
+                    self.ap.logger.error("No Base64 image data found.")
             break  # 只处理第一张图片
 
     def save_base64_image(self, base64_data):
@@ -87,7 +88,7 @@ class ImageSearchPlugin(BasePlugin):
     def parse_result(self, resp: YandexResponse):
         """ 解析 Yandex 搜索结果 """
         if not resp.raw:
-            self.ap.logger.warning("未找到匹配的搜索结果")
+            self.ap.logger.error("未找到匹配的搜索结果")
             return [platform_types.Plain("未找到匹配的图片信息。")]
 
         first_result = resp.raw[0]  # 取第一个搜索结果
