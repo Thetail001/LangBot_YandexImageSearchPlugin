@@ -7,7 +7,6 @@ from pkg.plugin.events import *
 import pkg.platform.types as platform_types
 from PicImageSearch import Network, Yandex
 from PicImageSearch.model import YandexResponse
-from io import BytesIO
 
 @register(name="YandexImageSearchPlugin", description="使用Yandex搜索图片来源",
           version="1.0", author="Thetail")
