@@ -26,7 +26,11 @@ class ImageSearchPlugin(BasePlugin):
         message_chain = ctx.event.query.message_chain
         for message in message_chain:
             if isinstance(message, platform_types.Image):
+                self.ap.logger.info(f"Image object raw data: {message.__dict__}")
+                self.ap.logger.info(f"Image ID: {message.image_id}")
+                self.ap.logger.info(f"Image URL: {message.url}")
                 image_url = message.url
+                self.ap.logger.info(f"{image_url}")
                 search_result = self.search_image(image_url)
                 if search_result:
                     # 使用 add_return 方法添加回复
