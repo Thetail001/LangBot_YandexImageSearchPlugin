@@ -8,7 +8,6 @@ import pkg.platform.types as platform_types
 from PicImageSearch import Network, Yandex
 from PicImageSearch.model import YandexResponse
 from io import BytesIO
-from PIL import Image
 
 @register(name="YandexImageSearchPlugin", description="使用Yandex搜索图片来源",
           version="1.0", author="Thetail")
@@ -32,11 +31,13 @@ class ImageSearchPlugin(BasePlugin):
         message_chain = ctx.event.query.message_chain
         for message in message_chain:
             if isinstance(message, platform_types.Image):
+                self.ap.logger.info("message, platform_types.Image")
                 if message.base64:
+                    self.ap.logger.info("message.base64")
                     temp_image_path = self.save_base64_image(message.base64)
                     try:
                         if temp_image_path:
-                            search_result = await self.search_image(temp_image_path)
+                            search_result = await asyncio.shield(self.search_image(temp_image_path))
                             if search_result:
                                 ctx.add_return('reply', search_result)
                                 ctx.prevent_default()
@@ -63,9 +64,8 @@ class ImageSearchPlugin(BasePlugin):
                 # 解码 Base64 数据
                 image_data = base64.b64decode(encoded)
                 
-                # 使用 PIL 读取并保存图片
-                image = Image.open(BytesIO(image_data))
-                image.save(temp_file.name)  # 保存到临时文件
+                temp_file.write(image_data)
+                temp_file.flush()  # 确保数据写入磁盘
                 self.ap.logger.info(f"图片已保存到临时文件: {temp_file.name}")
                 
                 # 返回临时文件路径
