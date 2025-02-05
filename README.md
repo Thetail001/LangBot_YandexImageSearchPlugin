@@ -39,9 +39,6 @@
 
 ## 使用
 
-**效果展示**
-
-![image](https://github.com/user-attachments/assets/de05ff22-2c16-4c00-b8ab-3f1fbedfb907)
-
+还没跑起来，测试用。
 
 
