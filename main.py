@@ -29,6 +29,8 @@ class ImageSearchPlugin(BasePlugin):
         """处理收到的消息"""
         self.ap.logger.info("开始处理消息。")
         message_chain = ctx.event.query.message_chain
+        self.ap.logger.info(f"message_chain 内容: {message_chain}")
+        self.ap.logger.info(f"message_chain 长度: {len(message_chain)}")
         for message in message_chain:
             if isinstance(message, platform_types.Image):
                 self.ap.logger.info("message, platform_types.Image")
