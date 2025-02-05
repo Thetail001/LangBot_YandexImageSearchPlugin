@@ -1,12 +1,17 @@
 # -*- coding: utf-8 -*-
-import requests
-from bs4 import BeautifulSoup, NavigableString
+import asyncio
+import base64
+import tempfile
 from pkg.plugin.context import register, handler, BasePlugin, APIHost, EventContext
 from pkg.plugin.events import *
 import pkg.platform.types as platform_types
+from PicImageSearch import Network, Yandex
+from PicImageSearch.model import YandexResponse
+from io import BytesIO
+from PIL import Image
 
-@register(name="ImageSearchPlugin", description="使用识图网站搜索图片来源",
-          version="1.0", author="BiFangKNT")
+@register(name="YandexImageSearchPlugin", description="使用Yandex搜索图片来源",
+          version="1.0", author="Thetail")
 class ImageSearchPlugin(BasePlugin):
 
     def __init__(self, host: APIHost):
@@ -16,119 +21,91 @@ class ImageSearchPlugin(BasePlugin):
     async def initialize(self):
         pass
 
+    def save_base64_image(self, base64_data):
+        """将 Base64 编码的图片数据保存为临时文件"""
+        try:
+            # 创建临时文件，后缀为 .jpg
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as temp_file:
+                # 去掉 Base64 头部信息（如 data:image/jpeg;base64,）
+                header, encoded = base64_data.split(",", 1) if "," in base64_data else ("", base64_data)
+                
+                # 解码 Base64 数据
+                image_data = base64.b64decode(encoded)
+                
+                # 使用 PIL 读取并保存图片
+                image = Image.open(BytesIO(image_data))
+                image.save(temp_file.name)  # 保存到临时文件
+                self.ap.logger.info(f"图片已保存到临时文件: {temp_file.name}")
+                
+                # 返回临时文件路径
+                return temp_file.name
+        except Exception as e:
+            self.ap.logger.error(f"解析 Base64 图片失败: {e}")
+            return None      
+
     @handler(PersonNormalMessageReceived)
     @handler(GroupNormalMessageReceived)
     async def on_message(self, ctx: EventContext):
         await self.process_message(ctx)
 
     async def process_message(self, ctx: EventContext):
-        # 检查消息中是否包含图片
+        """处理收到的消息"""
         message_chain = ctx.event.query.message_chain
         for message in message_chain:
             if isinstance(message, platform_types.Image):
-                self.ap.logger.info(f"Image object raw data: {message.__dict__}")
-                self.ap.logger.info(f"Image ID: {message.image_id}")
-                self.ap.logger.info(f"Image URL: {message.url}")
-                image_url = message.url
-                self.ap.logger.info(f"{image_url}")
-                search_result = self.search_image(image_url)
-                if search_result:
-                    # 使用 add_return 方法添加回复
-                    ctx.add_return('reply', [platform_types.Plain(search_result)])
-                    # 阻止该事件默认行为
-                    ctx.prevent_default()
-                    # 阻止后续插件执行
-                    ctx.prevent_postorder()
-                break
+                if message.base64:
+                    temp_image_path = self.save_base64_image(message.base64)
+                    try:
+                        if temp_image_path:
+                            search_result = await self.search_image(temp_image_path)
+                            if search_result:
+                                ctx.add_return('reply', search_result)
+                                ctx.prevent_default()
+                                ctx.prevent_postorder()
+                        else:
+                            self.ap.logger.warning("图片保存失败，无法进行搜索。")
+                    finally:
+                        # 确保临时文件被删除
+                        if temp_image_path:
+                            import os
+                            os.remove(temp_image_path)
+                else:
+                    self.ap.logger.warning("No Base64 image data found.")
+            break  # 只处理第一张图片
 
-    def search_image(self, image_url):
+    async def search_image(self, output_path):
+        """ 使用 PicImageSearch 进行 Yandex 以图搜图 """
         try:
-            url = "https://saucenao.com/search.php"
-            headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-            }
-            data = {'url': image_url, 'frame': '1', 'hide': '0', 'database': '999'}
-            
-            response = requests.post(url, data=data, headers=headers)
-
-            if response.status_code == 200:
-                return self.parse_result(response.text)
-            else:
-                return f"请求失败,状态码: {response.status_code}"
+            async with Network() as client:
+                yandex = Yandex(client=client)
+                resp = await yandex.search(file=output_path)
+                return self.parse_result(resp)
         except Exception as e:
             self.ap.logger.error(f"图片搜索失败: {str(e)}")
-            return "图片搜索失败,请稍后再试。"
+            return [platform_types.Plain("图片搜索失败，请稍后再试。")]
 
-    def parse_result(self, html_content):
-        soup = BeautifulSoup(html_content, 'html.parser')
-        result_div = soup.select_one('.resulttablecontent')
-        
-        if result_div:
-            result = []
+    def parse_result(self, resp: YandexResponse):
+        """ 解析 Yandex 搜索结果 """
+        if not resp.raw:
+            self.ap.logger.warning("未找到匹配的搜索结果")
+            return [platform_types.Plain("未找到匹配的图片信息。")]
 
-            # 处理 resulttitle
-            title_div = result_div.select_one('.resulttitle')
-            if title_div:
-                strong = title_div.find('strong')
-                if strong:
-                    key = strong.text.strip(': ')
-                    next_sibling = strong.next_sibling
-                    if next_sibling and isinstance(next_sibling, NavigableString):
-                        if key == 'Creator':
-                            key = '创作者'
-                        value = next_sibling.strip()
-                        result.append(f"{key}：{value}\n")
-                    else:
-                        result.append(f"图片标题：{strong.text.strip()}\n")
-                else:
-                    result.append(f"图片标题：{title_div.text.strip()}\n")
+        first_result = resp.raw[0]  # 取第一个搜索结果
 
-            # 处理所有的 resultcontentcolumn
-            content_columns = result_div.select('.resultcontentcolumn')
-            for column in content_columns:
-                strongs = column.find_all('strong')
-                if strongs:
-                    for strong in strongs:
-                        key = strong.text.strip(': ')
-                        if key == 'Source':
-                            key = '来源'
-                        elif key == 'Material':
-                            key = '原作'
-                        elif key == 'Characters':
-                            key = '角色'
-                        elif key == 'Author':
-                            key = '作者'
-                        elif key == 'Member':
-                            key = '站点成员'
-                        next_element = strong.next_sibling
-                        value = ''
-                        link_href = ''
-                        while next_element:
-                            if isinstance(next_element, NavigableString) and next_element.strip():
-                                value = next_element.strip()
-                                break
-                            elif next_element.name == 'a' and next_element.has_attr('href'):
-                                value = next_element.text.strip()
-                                link_href = next_element['href']
-                                break
-                            next_element = next_element.next_sibling
+        # 生成消息内容
+        message_parts = [
+            platform_types.Plain(
+                f"🔍 **Yandex 搜索结果**\n"
+                f"📌 **标题**: {first_result.title}\n"
+                f"🔗 **链接**: {first_result.url}\n"
+                f"📍 **来源**: {first_result.source}\n"
+                f"📄 **描述**: {first_result.content}\n"
+                f"📏 **尺寸**: {first_result.size}\n"
+            )
+        ]
 
-                        if link_href:
-                            result.append(f"{key}：{value}\n链接：{link_href}\n")
-                        else:
-                            result.append(f"{key}：{value}\n")
-                else:
-                    value = column.text.strip()
-                    link = column.find('a')
-                    if link:
-                        href = link.get('href', '')
-                        result.append(f"{value}\n链接：{href}\n")
-                    else:
-                        result.append(f"{value}\n")
+        # 添加缩略图作为图片
+        if first_result.thumbnail:
+            message_parts.append(platform_types.Image(url=first_result.thumbnail))
 
-            return "\n".join(result)
-        else:
-            return "未找到匹配的图片信息。"
-    
-    def __del__(self):
-        pass
+        return message_parts  # 返回列表
