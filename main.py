@@ -21,28 +21,6 @@ class ImageSearchPlugin(BasePlugin):
     async def initialize(self):
         pass
 
-    def save_base64_image(self, base64_data):
-        """将 Base64 编码的图片数据保存为临时文件"""
-        try:
-            # 创建临时文件，后缀为 .jpg
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as temp_file:
-                # 去掉 Base64 头部信息（如 data:image/jpeg;base64,）
-                header, encoded = base64_data.split(",", 1) if "," in base64_data else ("", base64_data)
-                
-                # 解码 Base64 数据
-                image_data = base64.b64decode(encoded)
-                
-                # 使用 PIL 读取并保存图片
-                image = Image.open(BytesIO(image_data))
-                image.save(temp_file.name)  # 保存到临时文件
-                self.ap.logger.info(f"图片已保存到临时文件: {temp_file.name}")
-                
-                # 返回临时文件路径
-                return temp_file.name
-        except Exception as e:
-            self.ap.logger.error(f"解析 Base64 图片失败: {e}")
-            return None      
-
     @handler(PersonNormalMessageReceived)
     @handler(GroupNormalMessageReceived)
     async def on_message(self, ctx: EventContext):
@@ -73,6 +51,28 @@ class ImageSearchPlugin(BasePlugin):
                     self.ap.logger.warning("No Base64 image data found.")
             break  # 只处理第一张图片
 
+    def save_base64_image(self, base64_data):
+        """将 Base64 编码的图片数据保存为临时文件"""
+        try:
+            # 创建临时文件，后缀为 .jpg
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as temp_file:
+                # 去掉 Base64 头部信息（如 data:image/jpeg;base64,）
+                header, encoded = base64_data.split(",", 1) if "," in base64_data else ("", base64_data)
+                
+                # 解码 Base64 数据
+                image_data = base64.b64decode(encoded)
+                
+                # 使用 PIL 读取并保存图片
+                image = Image.open(BytesIO(image_data))
+                image.save(temp_file.name)  # 保存到临时文件
+                self.ap.logger.info(f"图片已保存到临时文件: {temp_file.name}")
+                
+                # 返回临时文件路径
+                return temp_file.name
+        except Exception as e:
+            self.ap.logger.error(f"解析 Base64 图片失败: {e}")
+            return None      
+          
     async def search_image(self, output_path):
         """ 使用 PicImageSearch 进行 Yandex 以图搜图 """
         try:
