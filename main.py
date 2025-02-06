@@ -52,7 +52,7 @@ class ImageSearchPlugin(BasePlugin):
                             os.remove(temp_image_path)
                 else:
                     self.ap.logger.error("No Base64 image data found.")
-            break  # 只处理第一张图片
+            #break  # 只处理第一张图片
 
     def save_base64_image(self, base64_data):
         """将 Base64 编码的图片数据保存为临时文件"""
