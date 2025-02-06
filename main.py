@@ -28,13 +28,9 @@ class ImageSearchPlugin(BasePlugin):
         """处理收到的消息"""
         self.ap.logger.info("开始处理消息。")
         message_chain = ctx.event.query.message_chain
-        self.ap.logger.info(f"message_chain 内容: {message_chain}")
-        self.ap.logger.info(f"message_chain 长度: {len(message_chain)}")
         for message in message_chain:
             if isinstance(message, platform_types.Image):
-                self.ap.logger.info("message, platform_types.Image")
                 if message.base64:
-                    self.ap.logger.info("message.base64")
                     temp_image_path = self.save_base64_image(message.base64)
                     try:
                         if temp_image_path:
@@ -78,9 +74,9 @@ class ImageSearchPlugin(BasePlugin):
         """ 使用 PicImageSearch 进行 Yandex 以图搜图 """
         try:
             async with Network() as client:
-                yandex = Yandex(client=client)
-                self.ap.logger.info(f"temp_file_path： {temp_image_path}")      
+                yandex = Yandex(client=client)  
                 resp = await yandex.search(file=temp_image_path)
+                self.ap.logger.info(resp.origin)
                 return self.parse_result(resp)
         except Exception as e:
             self.ap.logger.error(f"图片搜索失败: {str(e)}")
