@@ -182,8 +182,16 @@ class ImageSearchPlugin(BasePlugin):
           
     async def search_image(self, temp_image_path):
         """ 使用 PicImageSearch 进行 Yandex 以图搜图 """
+        headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                  "(KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+    "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7",
+    "Referer": "https://yandex.com/images/",
+    "Connection": "keep-alive"
+        }
         try:
-            async with Network() as client:
+            async with Network(headers=headers) as client:
                 yandex = Yandex(client=client)
                 self.ap.logger.info(f"temp_image_path 的类型是: {type(temp_image_path)}")
                 resp = await yandex.search(file=temp_image_path)
