@@ -84,8 +84,10 @@ class ImageSearchPlugin(BasePlugin):
                 self.ap.logger.info(resp.origin)
                 return self.parse_result(resp)
         except Exception as e:
-            self.ap.logger.error(f"图片搜索失败: {str(e)}")
+            error_message = f"图片搜索失败: {str(e)}\n{traceback.format_exc()}"
+            self.ap.logger.error(error_message)
             return "图片搜索失败,请稍后再试。"
+                  
     def parse_result(self, resp: YandexResponse):
         """ 解析 Yandex 搜索结果 """
         if not resp.raw:
