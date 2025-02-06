@@ -79,7 +79,7 @@ class ImageSearchPlugin(BasePlugin):
         try:
             async with Network() as client:
                 yandex = Yandex(client=client)
-                self.ap.logger.info(f"temp_file_path： {temp_file_path}")      
+                self.ap.logger.info(f"temp_file_path： {temp_image_path}")      
                 resp = await yandex.search(file=temp_image_path)
                 return self.parse_result(resp)
         except Exception as e:
