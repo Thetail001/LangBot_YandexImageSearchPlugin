@@ -77,17 +77,20 @@ class ImageSearchPlugin(BasePlugin):
                 yandex = Yandex(client=client)
                 self.ap.logger.info(f"temp_image_path 的类型是: {type(temp_image_path)}")
                 resp = await yandex.search(file=temp_image_path)
+                if not resp: 
+                    self.ap.logger.error("Yandex 搜索返回空结果")
+                    return "搜索失败：未能获取到有效数据，请稍后再试。"
+
                 self.ap.logger.info(resp.origin)
                 return self.parse_result(resp)
         except Exception as e:
             self.ap.logger.error(f"图片搜索失败: {str(e)}")
-            return [platform_types.Plain("图片搜索失败，请稍后再试。")]
-
+            return "图片搜索失败,请稍后再试。"
     def parse_result(self, resp: YandexResponse):
         """ 解析 Yandex 搜索结果 """
         if not resp.raw:
             self.ap.logger.error("未找到匹配的搜索结果")
-            return [platform_types.Plain("未找到匹配的图片信息。")]
+            return "未找到匹配的图片信息。"
 
         first_result = resp.raw[0]  # 取第一个搜索结果
 
