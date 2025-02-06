@@ -52,7 +52,6 @@ class ImageSearchPlugin(BasePlugin):
                             os.remove(temp_image_path)
                 else:
                     self.ap.logger.error("No Base64 image data found.")
-            #break  # 只处理第一张图片
 
     def save_base64_image(self, base64_data):
         """将 Base64 编码的图片数据保存为临时文件"""
@@ -75,12 +74,12 @@ class ImageSearchPlugin(BasePlugin):
             self.ap.logger.error(f"解析 Base64 图片失败: {e}")
             return None      
           
-    async def search_image(self, output_path):
+    async def search_image(self, temp_image_path):
         """ 使用 PicImageSearch 进行 Yandex 以图搜图 """
         try:
             async with Network() as client:
                 yandex = Yandex(client=client)
-                resp = await yandex.search(file=output_path)
+                resp = await yandex.search(file=temp_image_path)
                 return self.parse_result(resp)
         except Exception as e:
             self.ap.logger.error(f"图片搜索失败: {str(e)}")
