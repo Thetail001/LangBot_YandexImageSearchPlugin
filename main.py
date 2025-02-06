@@ -74,7 +74,8 @@ class ImageSearchPlugin(BasePlugin):
         """ 使用 PicImageSearch 进行 Yandex 以图搜图 """
         try:
             async with Network() as client:
-                yandex = Yandex(client=client)  
+                yandex = Yandex(client=client)
+                self.ap.logger.info(f"temp_image_path 的类型是: {type(temp_image_path)}")
                 resp = await yandex.search(file=temp_image_path)
                 self.ap.logger.info(resp.origin)
                 return self.parse_result(resp)
