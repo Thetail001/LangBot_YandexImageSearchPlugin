@@ -28,6 +28,9 @@ class ImageSearchPlugin(BasePlugin):
     async def process_message(self, ctx: EventContext):
         """处理收到的消息"""
         self.ap.logger.info("开始处理消息。")
+
+        self.ap.logger.info(f"完整的 ctx 内容: {json.dumps(ctx.__dict__, default=str, indent=4)}")
+
         message_chain = ctx.event.query.message_chain
         for message in message_chain:
             if isinstance(message, platform_types.Image):
