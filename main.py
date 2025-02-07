@@ -29,9 +29,9 @@ class ImageSearchPlugin(BasePlugin):
         """处理收到的消息"""
         self.ap.logger.info("开始处理消息。")
         message_chain = ctx.event.query.message_chain
-        self.ap.logger.info(f"Raw message data: {message_chain}")
         for message in message_chain:
             if isinstance(message, platform_types.Image):
+                self.ap.logger.info(f"Image object raw data: {message.__dict__}")
                 if message.base64:
                     temp_image_path = self.save_base64_image(message.base64)
                     try:
