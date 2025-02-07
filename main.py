@@ -3,6 +3,7 @@ import asyncio
 import base64
 import tempfile
 import traceback
+import json
 from pkg.plugin.context import register, handler, BasePlugin, APIHost, EventContext
 from pkg.plugin.events import *
 import pkg.platform.types as platform_types
@@ -28,12 +29,10 @@ class ImageSearchPlugin(BasePlugin):
     async def process_message(self, ctx: EventContext):
         """处理收到的消息"""
         self.ap.logger.info("开始处理消息。")
-
-        self.ap.logger.info(f"完整的 ctx 内容: {json.dumps(ctx.__dict__, default=str, indent=4)}")
-
         message_chain = ctx.event.query.message_chain
         for message in message_chain:
             if isinstance(message, platform_types.Image):
+                self.ap.logger.info(f"图片消息数据: {json.dumps(message.__dict__, default=str, indent=4)}")
                 if message.base64:
                     temp_image_path = self.save_base64_image(message.base64)
                     try:
