@@ -118,12 +118,3 @@ class ImageSearchPlugin(BasePlugin):
 
     def __del__(self):
         pass
-
-        # 添加缩略图作为图片
-        if first_result.thumbnail:
-            message_parts.append(platform_types.Image(url=first_result.thumbnail))
-
-        return message_parts  # 返回列表
-
-    def __del__(self):
-        pass
