@@ -75,7 +75,7 @@ class ImageSearchPlugin(BasePlugin):
     async def search_image(self, temp_image_path):
         """ 使用 PicImageSearch 进行 Yandex 以图搜图 """
         try:
-            async with Network(proxies=PROXIES) as client:
+            async with Network(proxies=Config.PROXIES) as client:
                 yandex = Yandex(client=client)
                 resp = await yandex.search(file=temp_image_path)
                 if not resp: 
