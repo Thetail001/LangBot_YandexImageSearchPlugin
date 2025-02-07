@@ -8,8 +8,9 @@ from pkg.plugin.events import *
 import pkg.platform.types as platform_types
 from PicImageSearch import Network, Yandex
 from PicImageSearch.model import YandexResponse
+from plugins.LangBot_YandexImageSearchPlugin.config import Config
 
-@register(name="YandexImageSearchPlugin", description="使用Yandex搜索图片来源",
+@register(name="LangBot_YandexImageSearchPlugin", description="使用Yandex搜索图片来源",
           version="1.0", author="Thetail")
 class ImageSearchPlugin(BasePlugin):
 
@@ -74,15 +75,13 @@ class ImageSearchPlugin(BasePlugin):
     async def search_image(self, temp_image_path):
         """ 使用 PicImageSearch 进行 Yandex 以图搜图 """
         try:
-            async with Network() as client:
+            async with Network(proxies=PROXIES) as client:
                 yandex = Yandex(client=client)
-                self.ap.logger.info(f"temp_image_path 的类型是: {type(temp_image_path)}")
                 resp = await yandex.search(file=temp_image_path)
                 if not resp: 
                     self.ap.logger.error("Yandex 搜索返回空结果")
                     return "搜索失败：未能获取到有效数据，请稍后再试。"
-
-                self.ap.logger.info(resp.origin)
+                          
                 return self.parse_result(resp)
         except Exception as e:
             error_message = f"图片搜索失败: {str(e)}\n{traceback.format_exc()}"
