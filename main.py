@@ -100,6 +100,7 @@ class ImageSearchPlugin(BasePlugin):
         message_parts = [
             platform_types.Plain(
                 f"🔍 **Yandex 搜索结果**\n"
+                f"🔗 **搜索页面链接**: {resp.url}\n"
                 f"📌 **标题**: {first_result.title}\n"
                 f"🔗 **链接**: {first_result.url}\n"
                 f"📍 **来源**: {first_result.source}\n"
