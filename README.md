@@ -39,6 +39,8 @@
 
 ## 使用
 
-还没跑起来，测试用。
+使用提示：安装之后可进入本插件安装目录下的Config.py配置代理，不配置也可以，除非你是使用不了yandex搜图的地区，如香港IP。
+效果：![831f20cfe567a5ccb63b01aaf6d0c237](https://github.com/user-attachments/assets/8d513e7c-df44-4ce0-a1a8-8ccf695383b8)
+
 
 
