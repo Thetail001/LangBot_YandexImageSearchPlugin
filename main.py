@@ -11,7 +11,7 @@ from PicImageSearch.model import YandexResponse
 from plugins.LangBot_YandexImageSearchPlugin.config import Config
 
 @register(name="LangBot_YandexImageSearchPlugin", description="使用Yandex搜索图片来源",
-          version="1.0", author="Thetail")
+          version="1.1", author="Thetail")
 class ImageSearchPlugin(BasePlugin):
 
     def __init__(self, host: APIHost):
@@ -31,6 +31,15 @@ class ImageSearchPlugin(BasePlugin):
         self.ap.logger.info("开始处理消息。")
         message_chain = ctx.event.query.message_chain
         for message in message_chain:
+            if isinstance(message, platform_types.Plain):
+                if message.text.startswith("/si"):
+                    await self.process_command(ctx)
+                    break
+
+    async def process_command(self, ctx: EventContext):
+        """处理命令触发的事件"""
+        message_chain = ctx.event.query.message_chain
+        for message in message_chain:
             if isinstance(message, platform_types.Image):
                 if message.base64:
                     temp_image_path = self.save_base64_image(message.base64)
@@ -38,9 +47,11 @@ class ImageSearchPlugin(BasePlugin):
                         if temp_image_path:
                             search_result = await asyncio.shield(self.search_image(temp_image_path))
                             if search_result:
+                                self.ap.logger.info("命令模式的返回。")
                                 ctx.add_return('reply', search_result)
                                 ctx.prevent_default()
                                 ctx.prevent_postorder()
+                                break
                         else:
                             self.ap.logger.error("图片保存失败，无法进行搜索。")
                     finally:
