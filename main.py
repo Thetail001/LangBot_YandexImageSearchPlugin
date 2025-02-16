@@ -10,8 +10,7 @@ from PicImageSearch import Network, Yandex
 from PicImageSearch.model import YandexResponse
 from plugins.LangBot_YandexImageSearchPlugin.config import Config
 
-@register(name="LangBot_YandexImageSearchPlugin", description="使用Yandex搜索图片来源",
-          version="1.1", author="Thetail")
+@register(name="LangBot_YandexImageSearchPlugin", description="使用Yandex搜索图片来源",version="1.1", author="Thetail")
 class ImageSearchPlugin(BasePlugin):
 
     def __init__(self, host: APIHost):
