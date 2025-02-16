@@ -39,9 +39,11 @@
 
 ## 使用
 
-使用提示：安装之后可进入本插件安装目录下的Config.py配置代理，不配置也可以，除非你是使用不了yandex搜图的地区，如香港IP,然后发送给机器人图片就可以。
+使用提示：安装之后可进入本插件安装目录下的Config.py配置代理，不配置也可以，除非你是使用不了yandex搜图的地区，如香港IP,然后输出”/si“开头的命令进行搜图。
+
 效果:
-![IMG_20250208_034507](https://github.com/user-attachments/assets/8a4890a4-9708-48f6-9e9a-b2926bde738a)
+![080f56445b24bcabbd5a7fc41a18a946](https://github.com/user-attachments/assets/b373401d-08e8-473e-960a-dc917011093e)
+
 
 
 
