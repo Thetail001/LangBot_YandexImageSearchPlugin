@@ -27,7 +27,6 @@ class ImageSearchPlugin(BasePlugin):
 
     async def process_message(self, ctx: EventContext):
         """处理收到的消息"""
-        self.ap.logger.info("开始处理消息。")
         message_chain = ctx.event.query.message_chain
         for message in message_chain:
             if isinstance(message, platform_types.Plain):
@@ -46,7 +45,6 @@ class ImageSearchPlugin(BasePlugin):
                         if temp_image_path:
                             search_result = await asyncio.shield(self.search_image(temp_image_path))
                             if search_result:
-                                self.ap.logger.info("命令模式的返回。")
                                 ctx.add_return('reply', search_result)
                                 ctx.prevent_default()
                                 ctx.prevent_postorder()
