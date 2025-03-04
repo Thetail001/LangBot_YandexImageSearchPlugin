@@ -15,6 +15,7 @@ class ImageSearchPlugin(BasePlugin):
 
     def __init__(self, host: APIHost):
         super().__init__(host)
+        self.yandex_base_url = "https://yandex.ru"  # 在插件初始化时设置 base_url
 
     # 异步初始化
     async def initialize(self):
@@ -30,7 +31,7 @@ class ImageSearchPlugin(BasePlugin):
         message_chain = ctx.event.query.message_chain
         for message in message_chain:
             if isinstance(message, platform_types.Plain):
-                if "/si" in message.text:  # 改为检测是否包含 "/si"
+                if "/yan" in message.text:  # 改为检测是否包含 "/yan"
                     await self.process_command(ctx)
                     break
 
@@ -84,7 +85,7 @@ class ImageSearchPlugin(BasePlugin):
         """ 使用 PicImageSearch 进行 Yandex 以图搜图 """
         try:
             async with Network(proxies=Config.PROXIES) as client:
-                yandex = Yandex(client=client)
+                yandex = Yandex(client=client, base_url=self.yandex_base_url)
                 resp = await yandex.search(file=temp_image_path)
                 if not resp: 
                     self.ap.logger.error("Yandex 搜索返回空结果")
