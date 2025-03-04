@@ -31,7 +31,7 @@ class ImageSearchPlugin(BasePlugin):
         message_chain = ctx.event.query.message_chain
         for message in message_chain:
             if isinstance(message, platform_types.Plain):
-                if "/si" in message.text:  # 改为检测是否包含 "/si"
+                if "/yan" in message.text:  # 改为检测是否包含 "/yan"
                     await self.process_command(ctx)
                     break
 
