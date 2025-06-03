@@ -1,1 +1,1 @@
-picimagesearch==3.12.8
+PicImageSearch
